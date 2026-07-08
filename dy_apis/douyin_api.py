@@ -4,6 +4,14 @@ import re
 import time
 import urllib
 import uuid
+import builtins
+
+if not hasattr(builtins, "long"):
+    builtins.long = int
+if not hasattr(builtins, "unicode"):
+    builtins.unicode = str
+if not hasattr(builtins, "basestring"):
+    builtins.basestring = str
 
 import requests
 requests.packages.urllib3.disable_warnings()
@@ -447,7 +455,9 @@ class DouyinAPI:
         params.add_param("round_trip_time", "50")
         params.with_web_id(auth, refer)
         params.add_param("msToken", auth.msToken)
-        params.with_a_bogus()
+        # The current web search endpoint accepts the browser query without the
+        # legacy a_bogus value. The bundled signer now produces requests that
+        # time out in Chrome, so omit it for search.
         resp = requests.get(f'{DouyinAPI.douyin_url}{api}', headers=headers.get(), cookies=auth.cookie,
                             params=params.get(), verify=False)
         return json.loads(resp.text)
